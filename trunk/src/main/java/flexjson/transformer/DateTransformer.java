@@ -7,13 +7,14 @@ import flexjson.ObjectFactory;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.lang.reflect.Type;
+import java.util.Date;
 
 /**
  * User: brandongoodin
  * Date: Dec 12, 2007
  * Time: 11:20:39 PM
  */
-public class DateTransformer extends AbstractTransformer implements ObjectFactory {
+public class DateTransformer extends AbstractTransformer implements ObjectFactory<Date> {
 
     private String dateFormat;
     private ThreadLocal<SimpleDateFormat> formatter = new ThreadLocal<SimpleDateFormat>();
@@ -31,7 +32,7 @@ public class DateTransformer extends AbstractTransformer implements ObjectFactor
         getContext().writeQuoted(getFormatter().format(value));
     }
 
-    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+    public Date instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         try {
             return getFormatter().parse(value.toString());
         } catch (ParseException e) {
