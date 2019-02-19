@@ -31,7 +31,7 @@ import java.util.Date;
  * MM/dd/yy
  *
  */
-public class DateObjectFactory implements ObjectFactory {
+public class DateObjectFactory implements ObjectFactory<Date> {
 
     private static List<String> defaultFormats;
 
@@ -103,7 +103,7 @@ public class DateObjectFactory implements ObjectFactory {
      *
      * @return a properly initialized java.lang.Date object.
      */
-    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+    public Date instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         try {
             if( value instanceof Number ) {
                 return instantiateDate( (Class)targetType, ((Number)value).longValue(), context );

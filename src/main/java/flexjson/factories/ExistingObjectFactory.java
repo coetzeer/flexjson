@@ -15,12 +15,11 @@ public class ExistingObjectFactory implements ObjectFactory {
         this.source = source;
     }
 
-    @Override
     public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if( source instanceof Map ) {
-            return context.bindIntoMap( (Map)value, (Map<Object,Object>)source, null, null );
+            return context.bindIntoMap( (Map)value, (Map<Object,Object>)source, null, null, context.getPropertyObjectFactory() );
         } else if( source instanceof Collection) {
-            return context.bindIntoCollection( (Collection)value, (Collection)source, targetType );
+            return context.bindIntoCollection( (Collection)value, (Collection)source, targetType, context.getPropertyObjectFactory() );
         } else {
             return context.bindIntoObject( (Map)value, source, targetType );
         }

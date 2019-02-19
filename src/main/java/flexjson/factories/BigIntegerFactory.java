@@ -7,9 +7,9 @@ import flexjson.ObjectFactory;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 
-public class BigIntegerFactory implements ObjectFactory {
+public class BigIntegerFactory implements ObjectFactory<BigInteger> {
 
-    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+    public BigInteger instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if( value instanceof JsonNumber ) {
             return ((JsonNumber)value).toBigInteger();
         } else {
