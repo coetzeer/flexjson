@@ -10,7 +10,7 @@ import java.util.HashSet;
 public class SetObjectFactory implements ObjectFactory {
     public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if( value instanceof Collection) {
-            return context.bindIntoCollection((Collection)value, new HashSet(), targetType);
+            return context.bindIntoCollection((Collection)value, new HashSet(), targetType, context.getPropertyObjectFactory());
         } else {
             HashSet<Object> set = new HashSet<Object>();
             set.add( context.bind( value ) );

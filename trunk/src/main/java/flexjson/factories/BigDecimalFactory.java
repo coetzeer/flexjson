@@ -7,9 +7,9 @@ import flexjson.ObjectFactory;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
-public class BigDecimalFactory implements ObjectFactory {
+public class BigDecimalFactory implements ObjectFactory<BigDecimal> {
 
-    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+    public BigDecimal instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if( value instanceof JsonNumber) {
             return ((JsonNumber)value).toBigDecimal();
         } else {

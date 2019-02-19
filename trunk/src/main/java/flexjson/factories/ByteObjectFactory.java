@@ -5,9 +5,9 @@ import flexjson.ObjectFactory;
 
 import java.lang.reflect.Type;
 
-public class ByteObjectFactory implements ObjectFactory {
+public class ByteObjectFactory implements ObjectFactory<Byte> {
 
-    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+    public Byte instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if( value instanceof Number ) {
             return ((Number)value).byteValue();
         } else {
