@@ -21,8 +21,7 @@ public class NullTransformer extends AbstractTransformer {
      * This is the default tranformer for handling nulls. This class
      * functions according to the JSON specification.
      *
-     * @param object
-     * @return
+     * @param object The null object
      */
     public void transform(Object object) {
         getContext().write("null");
