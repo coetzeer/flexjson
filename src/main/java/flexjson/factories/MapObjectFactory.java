@@ -17,11 +17,10 @@ public class MapObjectFactory implements ObjectFactory<Map> {
                 Type valueType = ptype.getActualTypeArguments()[1];
                 return context.bindIntoMap( (Map)value, createMapImpl(),
                         keyType == Object.class ? null : keyType,
-                        valueType == Object.class ? null : valueType,
-                        context.getValueObjectFactory() );
+                        valueType == Object.class ? null : valueType);
             }
         }
-        return context.bindIntoMap( (Map)value, createMapImpl(), null, null, context.getValueObjectFactory() );
+        return context.bindIntoMap( (Map)value, createMapImpl(), null, null);
     }
 
     protected HashMap<Object, Object> createMapImpl() {

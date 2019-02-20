@@ -43,15 +43,15 @@ public class JsonSerializationAndDeserializationTest {
 
     @Test
     public void testUseandRootDeserialization() {
-        String json = "{\"foo\":\"bar\", \"class\":\"java.lang.Integer\"}";
+        String json = "{\"foo\":\"bar\"}";
         Map<String,String> useMap = new JSONDeserializer<Map<String,String>>().use(null, HashMap.class).deserialize( json );
         Map<String,String> rootMap = new JSONDeserializer<Map<String,String>>().deserialize( json, HashMap.class );
 
         assertEquals( rootMap.size(), useMap.size() );
         assertEquals( "bar", useMap.get("foo") );
         assertEquals( "bar", rootMap.get("foo") );
-        assertEquals( "java.lang.Integer", useMap.get("class") );
-        assertEquals( "java.lang.Integer", rootMap.get("class") );
+//        assertEquals( "java.lang.Integer", useMap.get("class") );
+//        assertEquals( "java.lang.Integer", rootMap.get("class") );
     }
     
     @Test
@@ -129,7 +129,11 @@ public class JsonSerializationAndDeserializationTest {
         String json = jsonSerializer.deepSerialize( demo );
         JSONDeserializer<MapNoTyping> jsonDeserializer = new JSONDeserializer<MapNoTyping>();
         MapNoTyping result = jsonDeserializer
-                .use("data.key3", TestClass3.class)
+//                .use("data.values", new ObjectFactory() {
+//                    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+//
+//                    }
+//                })
                 .deserialize( json, MapNoTyping.class );
 
         assertTrue( result.getData().containsKey("key1") );
