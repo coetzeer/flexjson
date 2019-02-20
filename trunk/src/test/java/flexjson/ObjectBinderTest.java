@@ -26,7 +26,7 @@ public class ObjectBinderTest extends TestCase {
         map.put("lastname", "Hubbard");
 
         ObjectBinder binder = new ObjectBinder();
-        Object boundObject = binder.bind( map );
+        Object boundObject = binder.bind( map, Person.class );
 
         assertEquals("Assert that we received a person class back.", Person.class, boundObject.getClass() );
         Person p = (Person)boundObject;
@@ -41,7 +41,7 @@ public class ObjectBinderTest extends TestCase {
         map.put("birthdate", targetDate.getTime() );
 
         ObjectBinder binder = new ObjectBinder();
-        Person person = (Person)binder.bind( map );
+        Person person = (Person)binder.bind( map, Person.class );
 
         assertEquals( targetDate, person.getBirthdate() );
     }
@@ -53,7 +53,7 @@ public class ObjectBinderTest extends TestCase {
         map.put("birthdate", targetDate.toString() );
 
         ObjectBinder binder = new ObjectBinder();
-        Person person = (Person)binder.bind( map );
+        Person person = (Person)binder.bind( map, Person.class );
 
         assertEquals( targetDate, person.getBirthdate() );
     }
@@ -65,7 +65,7 @@ public class ObjectBinderTest extends TestCase {
         map.put("birthdate", (double)targetDate.getTime() );
 
         ObjectBinder binder = new ObjectBinder();
-        Person person = (Person)binder.bind( map );
+        Person person = (Person)binder.bind( map, Person.class );
 
         assertEquals( targetDate, person.getBirthdate() );
     }
@@ -107,7 +107,7 @@ public class ObjectBinderTest extends TestCase {
         map.put("phones", createPhoneMap(phones) );
 
         ObjectBinder binder = new ObjectBinder().use(Path.parse("phones.values"), new ClassLocatorObjectFactory( new StaticClassLocator(Phone.class) ) );
-        Person person = (Person)binder.bind( map );
+        Person person = (Person)binder.bind( map, Person.class );
 
         assertTrue( "Make sure our array has stuff in it.", !person.getPhones().isEmpty() );
         assertEquals( 3, person.getPhones().size() );
@@ -167,7 +167,7 @@ public class ObjectBinderTest extends TestCase {
         map.put("work", work );
 
         ObjectBinder binder = new ObjectBinder();
-        Person person = (Person)binder.bind( map );
+        Person person = (Person)binder.bind( map, Person.class );
 
         assertEquals( home.get("street"), person.getHome().getStreet() );
         assertEquals( home.get("city"), person.getHome().getCity() );

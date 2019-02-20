@@ -18,4 +18,8 @@ public class XRayVision implements SuperPower {
     protected void setPower(float power) {
         this.power = power;
     }
+
+    public String getType() {
+        return "xray";
+    }
 }

@@ -36,6 +36,4 @@ public @interface JSON {
     String name() default "";
     boolean include() default true;
     Class<? extends Transformer> transformer() default Transformer.class;
-    Class<? extends ObjectFactory> objectFactory() default ObjectFactory.class;
-
 }

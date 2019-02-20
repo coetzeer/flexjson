@@ -128,7 +128,9 @@ public class JsonSerializationAndDeserializationTest {
 
         String json = jsonSerializer.deepSerialize( demo );
         JSONDeserializer<MapNoTyping> jsonDeserializer = new JSONDeserializer<MapNoTyping>();
-        MapNoTyping result = jsonDeserializer.deserialize( json );
+        MapNoTyping result = jsonDeserializer
+                .use("data.key3", TestClass3.class)
+                .deserialize( json, MapNoTyping.class );
 
         assertTrue( result.getData().containsKey("key1") );
         assertTrue(result.getData().containsKey("key2"));
