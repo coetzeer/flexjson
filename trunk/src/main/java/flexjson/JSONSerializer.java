@@ -37,22 +37,20 @@ import java.util.Map;
  * work load, and keeps you
  * <a href="http://en.wikipedia.org/wiki/Don't_repeat_yourself">DRY</a>.
  * </p>
- * <p/>
  * <p>
  * Let's go through a simple example:
  * </p>
- * <p/>
+ *
  * <pre>
  *    JSONSerializer serializer = new JSONSerializer();
  *    return serializer.serialize( person );
- * <p/>
  * </pre>
- * <p/>
+ *
  * <p>
  * What this statement does is output the json from the instance of person.  So
  * the JSON we might see for this could look like:
  * </p>
- * <p/>
+ *
  * <pre>
  *    { "class": "com.mysite.Person",
  *      "firstname": "Charlie",
@@ -60,8 +58,8 @@ import java.util.Map;
  *      "age", 23
  *      "birthplace": "Big Sky, Montanna"
  *    }
- * <p/>
  * </pre>
+ *
  * <p>
  * In this case it's look like it's pretty standard stuff.  But, let's say
  * Person had many hobbies (i.e. Person.hobbies is a java.util.List).  In
@@ -70,20 +68,21 @@ import java.util.Map;
  * variable that is a Collection, Map, or Object reference won't be serialized
  * by default.  This is what gives flexjson the shallow serialization.
  * </p>
- * <p/>
+ *
  * <p>
  * How would we include the <em>hobbies</em> field?  Using the {@link JSONSerializer#include}
  * method allows us to include these fields in the serialization process.  Here is
  * how we'd do that:
  * </p>
- * <p/>
+ *
  * <pre>
  *    return new JSONSerializer().include("hobbies").serialize( person );
- * <p/>
  * </pre>
- * <p/>
+ *
+ * <p>
  * That would produce output like:
- * <p/>
+ * </p>
+ *
  * <pre>
  *    { "class": "com.mysite.Person",
  *      "firstname": "Charlie",
@@ -97,9 +96,8 @@ import java.util.Map;
  *          "bull riding"
  *      ]
  *    }
- * <p/>
  * </pre>
- * <p/>
+ *
  * <p>
  * If the <em>hobbies</em> field contained objects, say Hobby instances, then a
  * shallow copy of those objects would be performed.  Let's go further and say
@@ -108,36 +106,34 @@ import java.util.Map;
  * shallow copy is being performed on Hobby JSONSerialize won't serialize the people
  * field when serializing Hobby instances thus breaking the chain of circular references.
  * </p>
- * <p/>
+ *
  * <p>
  * But, for the sake of argument and illustration let's say we wanted to send the
  * <em>people</em> field in Hobby.  We can do the following:
  * </p>
- * <p/>
+ *
  * <pre>
  *    return new JSONSerializer().include("hobbies.people").serialize( person );
- * <p/>
  * </pre>
- * <p/>
+ *
  * <p>
  * JSONSerializer is smart enough to know that you want <em>hobbies</em> field included and
  * the <em>people</em> field inside hobbies' instances too.  The dot notation allows you
  * do traverse the object graph specifying instance fields.  But, remember a shallow copy
  * will stop the code from getting into an infinte loop.
  * </p>
- * <p/>
+ *
  * <p>
  * You can also use the exclude method to exclude fields that would be included.  Say
  * we have a User object.  It would be a serious security risk if we sent the password
  * over the network.  We can use the exclude method to prevent the password field from
  * being sent.
  * </p>
- * <p/>
+ *
  * <pre>
  *   return new JSONSerialize().exclude("password").serialize(user);
- * <p/>
  * </pre>
- * <p/>
+ *
  * <p>
  * JSONSerializer will also pay attention to any method or field annotated by
  * {@link flexjson.JSON}.  You can include and exclude fields permenantly using the
@@ -146,7 +142,7 @@ import java.util.Map;
  * <em>favoriteMovies</em> depends on the situation so it's best NOT to annotate
  * those fields, and use the {@link JSONSerializer#include} method.
  * </p>
- * <p/>
+ *
  * <p>
  * In a shallow copy only these types of instance fields will be sent:
  * <strong>String</strong>, <strong>Date</strong>, <strong>Number</strong>,
@@ -155,6 +151,7 @@ import java.util.Map;
  * except for Collection or Arrays.  Anything that would cause a N objects would not be sent.
  * All types will be excluded by default.  Fields marked static or transient are not serialized.
  * </p>
+ *
  * <p>
  * Includes and excludes can include wildcards.  Wildcards allow you to do things like exclude
  * all class attributes.  For example *.class would remove the class attribute that all objects
@@ -165,6 +162,7 @@ import java.util.Map;
  * The first expression to match a path that action will be taken thus short circuiting all other
  * expressions defined later.
  * </p>
+ *
  * <p>
  * Transforers are a new addition that allow you to modify the values that are being serialized.
  * This allows you to create different output for certain conditions.  This is very important in
@@ -174,6 +172,7 @@ import java.util.Map;
  * Transformers are specified in dot notation just like include and exclude methods, but it doesn't
  * support wildcards.
  * </p>
+ *
  * <p>
  * JSONSerializer is safe to use the serialize() methods from two seperate
  * threads.  It is NOT safe to use combination of {@link JSONSerializer#include(String...)}

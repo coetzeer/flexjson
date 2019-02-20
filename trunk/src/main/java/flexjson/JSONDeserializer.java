@@ -17,20 +17,23 @@ import java.util.HashMap;
  * the simplest case of class attributes in your json.  We'll look at how {@link JSONSerializer} and
  * JSONDeserializer pair together out of the box.
  * </p>
+ *
  * <p>
  * Say we have a simple object like Hero (see the superhero package under the test and mock).
  * To create a json represenation of Hero we'd do the following:
  * </p>
  *
  * <pre>
- *   Hero harveyBirdman = new Hero("Harvey Birdman", new SecretIdentity("Attorney At Law"), new SecretLair("Sebben & Sebben") );
+ *   Hero harveyBirdman = new Hero("Harvey Birdman", new SecretIdentity("Attorney At Law"), new SecretLair("Sebben &amp; Sebben") );
  *   String jsonHarvey = new JSONSerialize().serialize(hero);
  * </pre>
+ *
  * <p>
- * Now to reconsitute Harvey to fight for the law we'd use JSONDeserializer like so:
+ * Now to reconstitute Harvey to fight for the law we'd use JSONDeserializer like so:
  * </p>
+ *
  * <pre>
- *   Hero hero = new JSONDeserializer<Hero>().deserialize( jsonHarvey );
+ *   Hero hero = new JSONDeserializer&lt;Hero&gt;().deserialize( jsonHarvey, Hero.class );
  * </pre>
  * <p>
  * Pretty easy when all the type information is included with the JSON data.  Now let's look at the more difficult
@@ -43,13 +46,16 @@ import java.util.HashMap;
  * <pre>
  *   String jsonHarvey = new JSONSerialize().exclude("*.class").serialize(hero);
  * </pre>
+ *
  * <p>
  * The big trick here is to replace that type information when we instantiate the deserializer.
  * To do that we'll use the {@link flexjson.JSONDeserializer#use(String, Class)} method like so:
  * </p>
+ *
  * <pre>
- *   Hero hero = new JSONDeserializer<Hero>().use( null, Hero.class ).deserialize( jsonHarvey );
+ *   Hero hero = new JSONDeserializer&lt;Hero&gt;().use( null, Hero.class ).deserialize( jsonHarvey, Hero.class );
  * </pre>
+ *
  * <p>
  * Like riding a horse with no saddle without our type information.  So what is happening here is we've registered
  * the Hero class to the root of the json.  The {@link flexjson.JSONDeserializer#use(String, Class)} method  uses
@@ -57,12 +63,14 @@ import java.util.HashMap;
  * it knows where it is in the object graph.  It uses that graph path to look up the java class it should use
  * when reconstituting the object.
  * </p>
+ *
  * <p>
  * Notice that in our json you'd see there is no type information in the stream.  However, all we had to do is point
  * the class at the Hero object, and it figured it out.  That's because it uses the target type (in this case Hero)
  * to figure out the other types by inspecting that class.  Meaning notice that we didn't have to tell it about
  * SecretLair or SecretIdentity.  That's because it can figure that out from the Hero class.
  * </p>
+ *
  * <p>
  * Pretty cool.  Where this fails is when we starting working with interfaces, abstract classes, and subclasses.
  * Yea our friend polymorphism can be a pain when deserializing.  Why?  Well if you haven't realized by now
@@ -70,6 +78,7 @@ import java.util.HashMap;
  * can't tell the subclass by looking at the super class alone.  Next section we're going to stand up on our
  * bare back horse.  Ready?  Let's do it.
  * </p>
+ *
  * <p>
  * Before we showed how the {@link flexjson.JSONDeserializer#use(String, Class)} method would allow us to
  * plug in a single class for a given path.  That might work when you know exactly which class you want to
@@ -97,13 +106,11 @@ import java.util.HashMap;
  *      .transform( new SimpleTransformer(), "powers.class")
  *      .exclude("*.class")
  *      .serialize( superhero );
- * Hero hero = new JSONDeserializer<Hero>()
+ * Hero hero = new JSONDeserializer&lt;Hero&gt;()
  *      .use("powers.class", new PackageClassLocator())
  *      .deserialize( json );
  * </pre>
- * <p>
  *
- * </p>
  * <p>
  * All objects that pass through the deserializer must have a no argument constructor.  The no argument
  * constructor does not have to be public.  That allows you to maintain some encapsulation.  JSONDeserializer
@@ -113,6 +120,7 @@ import java.util.HashMap;
  * can be different from your Java object structure.  The works very much in the same way getters do for
  * the {@link flexjson.JSONSerializer}.
  * </p>
+ *
  * <p>
  * Collections and Maps have changed the path structure in order to specify concrete classes for both
  * the Collection implementation and the contained values.  Normally you would use generics to specify
@@ -122,14 +130,17 @@ import java.util.HashMap;
  * append "values" onto the path.  For example, if your collection path is "person.friends" you can
  * specify the collection type using:
  * </p>
+ *
  * <pre>
  * new JSONDeserializer().use("person.friends", ArrayList.class).use("person.friends.values", Frienemies.class)
  * </pre>
+ *
  * <p>
  * Notice that append "values" onto the "person.friends" to specify the class to use inside the
  * Collection.  Maps have both keys and values within them.  For Maps you can specify those by
  * appending "keys" and "values" to the path.
  * </p>
+ *
  * <p>
  * Now onto the advanced topics of the deserializer.  {@link flexjson.ObjectFactory} interface is the
  * underpinnings of the deserializer.  All object creation is controlled by ObjectFactories.  By default

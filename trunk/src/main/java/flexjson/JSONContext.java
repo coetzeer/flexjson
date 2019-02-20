@@ -58,8 +58,7 @@ public class JSONContext {
     /**
      * Run a transformer on the provided object
      *
-     * @param object
-     * @return
+     * @param object object to be transformed
      */
     public void transform(Object object) {
 
@@ -74,12 +73,13 @@ public class JSONContext {
     }
 
     /**
-     * Retrieves a transformer for the provided object
+     * Retrieves a transformer for the provided object.  Either the object's path, or the object's class is used to find the Transformer.
      *
-     *
-     * @param prop
-     * @param object
-     * @return
+     * @param prop The BeanProperty for this given object
+     * @param object The object we will transform.  This is used to find the Transformer for this object's class.
+     * @return Transformer for the property path, or the class of the object
+     * @throws IllegalAccessException if the userlying Transformer isn't allowed to instantiate
+     * @throws InstantiationException if the underlying Transformer cannot be instantiated
      */
     public Transformer getTransformer(BeanProperty prop, Object object) throws IllegalAccessException, InstantiationException {
 
@@ -110,7 +110,7 @@ public class JSONContext {
     /**
      * used to pass in configured transformers from the JsonSerializer
      *
-     * @param typeTransformerMap
+     * @param typeTransformerMap The map of Transformers to use for this serializer.
      */
     public void setTypeTransformers(TypeTransformerMap typeTransformerMap) {
         this.typeTransformerMap = typeTransformerMap;
@@ -119,7 +119,7 @@ public class JSONContext {
     /**
      * used to pass in configured transformers from the JsonSerializer
      *
-     * @param pathTransformerMap
+     * @param pathTransformerMap used to configure the path to Transformer map to use.
      */
     public void setPathTransformers(Map<Path, Transformer> pathTransformerMap) {
         this.pathTransformerMap = pathTransformerMap;
@@ -130,7 +130,7 @@ public class JSONContext {
     /**
      * configures the context to output JSON with new lines and indentations
      *
-     * @param prettyPrint
+     * @param prettyPrint Should we prettyPrint the output
      */
     public void setPrettyPrint(boolean prettyPrint) {
         this.prettyPrint = prettyPrint;
@@ -156,7 +156,7 @@ public class JSONContext {
     /**
      * Set the output handler.
      *
-     * @param out
+     * @param out The OutputHandler instance to use for controlling out the JSON is written out
      */
     public void setOut(OutputHandler out) {
         this.out = out;
@@ -165,7 +165,7 @@ public class JSONContext {
     /**
      * getTransformer output handler
      *
-     * @return
+     * @return OutputHandler this serializer uses to write JSON output to.
      */
     public OutputHandler getOut() {
         return out;
@@ -174,7 +174,7 @@ public class JSONContext {
     /**
      * write a simple non-quoted value to output
      *
-     * @param value
+     * @param value The value to write to the JSON output
      */
     public void write(String value) {
     	
@@ -296,7 +296,7 @@ public class JSONContext {
     /**
      * write a quoted and escaped value to the output
      *
-     * @param value
+     * @param value the value that should be written to the JSON
      */
     public void writeQuoted(String value) {
     	
@@ -363,7 +363,7 @@ public class JSONContext {
     /**
      * static method to getTransformer the context for this thread
      *
-     * @return
+     * @return JSONContext instance tied to this thread
      */
     public static JSONContext get() {
         return context.get();
