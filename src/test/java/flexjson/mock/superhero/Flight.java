@@ -15,4 +15,7 @@ public class Flight implements SuperPower {
         return velocity;
     }
 
+    public String getType() {
+        return "flight";
+    }
 }

@@ -1,5 +1,8 @@
 package flexjson.mock.superhero;
 
+import flexjson.JSONTypeHierarchy;
+import flexjson.TypeMapping;
+
 import java.util.List;
 import java.util.Arrays;
 
@@ -8,6 +11,13 @@ public class Hero {
     private SecretLair lair;
     private SecretIdentity identity;
     private String name;
+
+    @JSONTypeHierarchy(typeFieldName = "type", typeMappings = {
+            @TypeMapping(value="xray", type = XRayVision.class),
+            @TypeMapping(value="flight", type = Flight.class),
+            @TypeMapping(value="heat", type = HeatVision.class),
+            @TypeMapping(value="invincible", type = Invincible.class)
+    })
     private List<SuperPower> powers;
 
     protected Hero() {

@@ -1,7 +1,6 @@
 package flexjson;
 
 import flexjson.factories.DateObjectFactory;
-import flexjson.factories.ExistingObjectFactory;
 import flexjson.model.Account;
 import flexjson.transformer.DateTransformer;
 import flexjson.transformer.Transformer;
@@ -34,7 +33,7 @@ public class JSONDeserializerTest {
     public void testDeserializeNoIncludes() {
         Person charlie = creator.createCharlie();
         String json = new JSONSerializer().serialize(charlie);
-        Person jsonCharlie = new JSONDeserializer<Person>().deserialize(json);
+        Person jsonCharlie = new JSONDeserializer<Person>().deserialize(json, Person.class);
         assertNotNull("Make sure we deserialized something non-null", jsonCharlie);
 
         assertEquals(charlie.getLastname(), jsonCharlie.getLastname());
@@ -68,7 +67,7 @@ public class JSONDeserializerTest {
     public void testDeserializeWithIncludes() {
         Person charlie = creator.createCharlie();
         String json = new JSONSerializer().include("phones", "hobbies").serialize(charlie);
-        Person jsonCharlie = new JSONDeserializer<Person>().deserialize(json);
+        Person jsonCharlie = new JSONDeserializer<Person>().deserialize(json, Person.class);
         assertNotNull("Make sure we deserialized something non-null", jsonCharlie);
 
         assertFalse("Make sure that our phones are not empty", jsonCharlie.getPhones().isEmpty());
@@ -82,17 +81,22 @@ public class JSONDeserializerTest {
     public void testSubClassDeserialize() {
         Employee dilbert = creator.createDilbert();
         String json = new JSONSerializer().include("phones", "hobbies").serialize(dilbert);
-        Person jsonDilbert = new JSONDeserializer<Person>().deserialize(json);
+        Person jsonDilbert = new JSONDeserializer<Person>().deserialize(json, Employee.class);
         assertNotNull("Make sure we got back dilbert.", jsonDilbert);
         assertTrue("Make sure dilbert came back as an employee.", jsonDilbert instanceof Employee);
         assertEquals("Make sure dilbert has a company.", dilbert.getCompany(), ((Employee) jsonDilbert).getCompany());
     }
 
     @Test
-    public void testDeserializeInterfaces() {
+    public void testDeserializeInterfacesUsingAnnotations() {
         Hero superman = creator.createSuperman();
-        String json = new JSONSerializer().include("powers").serialize(superman);
-        Hero jsonSuperMan = new JSONDeserializer<Hero>().deserialize(json);
+        String json = new JSONSerializer()
+                .include("powers")
+                .transform(new SimpleClassnameTransformer(), "powers.class")
+                .serialize(superman);
+
+        Hero jsonSuperMan = new JSONDeserializer<Hero>()
+                .deserialize(json, Hero.class);
         assertNotNull("Make sure we got back a superman", jsonSuperMan);
 
         assertEquals("Make sure the super powers were created properly.", 4, jsonSuperMan.getPowers().size());
@@ -103,7 +107,10 @@ public class JSONDeserializerTest {
     public void testNoClassHints() {
         Hero superman = creator.createSuperman();
         String json = new JSONSerializer().exclude("*.class").serialize(superman);
-        Hero jsonSuperMan = new JSONDeserializer<Hero>().use(null, Hero.class).use("lair", SecretLair.class).use("secretIdentity", SecretIdentity.class).deserialize(json);
+        Hero jsonSuperMan = new JSONDeserializer<Hero>()
+                .use("lair", SecretLair.class)
+                .use("secretIdentity", SecretIdentity.class)
+                .deserialize(json, Hero.class);
 
         assertNotNull("Make sure we got back a superman", jsonSuperMan);
         assertEquals("Assert our name is super man", "Super Man", jsonSuperMan.getName());
@@ -116,7 +123,7 @@ public class JSONDeserializerTest {
     @Test
     public void testNoHintsButClassesForCollection() {
         Hero superman = creator.createSuperman();
-        String json = new JSONSerializer().include("powers.class").exclude("*.class").serialize(superman);
+        String json = new JSONSerializer().exclude("*.class").deepSerialize(superman);
         Hero jsonSuperMan = new JSONDeserializer<Hero>()
                 .deserialize(json, Hero.class);
         assertHeroHasPowers(jsonSuperMan);
@@ -154,12 +161,8 @@ public class JSONDeserializerTest {
         list.add(charlie);
         list.add(pedro);
 
-        String json = new JSONSerializer().serialize(list);
-        List<Person> people = new JSONDeserializer<List<Person>>().deserialize(json);
-        assertEquals(ArrayList.class, people.getClass());
-
-        json = new JSONSerializer().exclude("*.class").serialize( list );
-        people = new JSONDeserializer<List<Person>>().use("values", Person.class).deserialize(json);
+        String json = new JSONSerializer().exclude("*.class").serialize( list );
+        List<Person> people = new JSONDeserializer<List<Person>>().use("values", Person.class).deserialize(json);
 
         assertEquals(ArrayList.class, people.getClass() );
         assertEquals(3, people.size());
@@ -240,7 +243,7 @@ public class JSONDeserializerTest {
         DateTransformer transformer = new DateTransformer( df.toPattern() );
 
         String json = new JSONSerializer().transform(transformer, "birthdate").serialize(charlie);
-        Person newUser = new JSONDeserializer<Person>().deserialize(json);
+        Person newUser = new JSONDeserializer<Person>().deserialize(json, Person.class);
 
         assertEquals( charlie.getBirthdate(), newUser.getBirthdate() );
         assertEquals( "03/21/76", df.format(newUser.getBirthdate()) );
@@ -248,14 +251,14 @@ public class JSONDeserializerTest {
         String pattern = "yyyy-MM-dd hh:mm:ss";
 
         json = new JSONSerializer().transform( new DateTransformer( pattern ), Date.class ).serialize(charlie);
-        Person user = new JSONDeserializer<Person>().use("birthdate", new DateObjectFactory().add(pattern) ).deserialize(json);
+        Person user = new JSONDeserializer<Person>().use("birthdate", new DateObjectFactory().add(pattern) ).deserialize(json, Person.class);
 
         assertEquals( charlie.getBirthdate(), user.getBirthdate() );
         assertEquals( "03/21/76", df.format( user.getBirthdate() ) );
 
         DateObjectFactory.addDefaultFormat( pattern );
         json = new JSONSerializer().transform( new DateTransformer( pattern ), Date.class ).serialize(charlie);
-        user = new JSONDeserializer<Person>().deserialize(json);
+        user = new JSONDeserializer<Person>().deserialize(json, Person.class);
 
         assertEquals( charlie.getBirthdate(), user.getBirthdate() );
         assertEquals( "03/21/76", df.format( user.getBirthdate() ) );
@@ -269,19 +272,21 @@ public class JSONDeserializerTest {
         DateTransformer transformer = new DateTransformer("yyyy/MM/dd");
 
         String json = new JSONSerializer().transform(transformer, "birthdate").serialize(charlie);
-        Person newUser = new JSONDeserializer<Person>().use(transformer, "birthdate").deserialize(json);
+        Person newUser = new JSONDeserializer<Person>().use(transformer, "birthdate").deserialize(json, Person.class);
         assertEquals( charlie.getBirthdate(), newUser.getBirthdate() );
         assertEquals( "2009/01/02", df.format(newUser.getBirthdate()) );
 
         json = new JSONSerializer().serialize(charlie);
-        newUser = new JSONDeserializer<Person>().deserialize(json);
+        newUser = new JSONDeserializer<Person>().deserialize(json, Person.class);
         assertEquals( charlie.getBirthdate(), newUser.getBirthdate() );
         assertEquals( "2009/01/02", df.format(newUser.getBirthdate()) );
     }
 
     @Test
     public void testMapWithEmbeddedObject() {
-        Map<String,Network> networks = new JSONDeserializer<Map<String,Network>>().deserialize( "{\"1\": {\"class\":\"flexjson.mock.Network\", \"name\": \"Charlie\"} }" );
+        Map<String,Network> networks = new JSONDeserializer<Map<String,Network>>()
+                .use("values", Network.class)
+                .deserialize( "{\"1\": {\"class\":\"flexjson.mock.Network\", \"name\": \"Charlie\"} }" );
 
         assertNotNull( networks );
         assertEquals( 1, networks.size() );
@@ -504,7 +509,7 @@ public class JSONDeserializerTest {
         people.put("Alabama", creator.createBen());
 
         String json = new JSONSerializer().include("*.hobbies").serialize( people );
-        Map<String,Person> people2 = new JSONDeserializer<Map<String,Person>>().deserializeInto( json, new TreeMap<String,Person>() );
+        Map<String,Person> people2 = new JSONDeserializer<Map<String,Person>>().use("values", Person.class).deserializeInto( json, new TreeMap<String,Person>() );
 
         assertEquals( TreeMap.class, people2.getClass() );
         assertEquals( people.size(), people2.size() );
@@ -519,7 +524,7 @@ public class JSONDeserializerTest {
         spiderman.superpower = "Creates Many Webs and Super Tough";
 
         String json = new JSONSerializer().serialize( spiderman );
-        Spiderman jsonSpiderman = new JSONDeserializer<Spiderman>().deserialize( json );
+        Spiderman jsonSpiderman = new JSONDeserializer<Spiderman>().deserialize( json, Spiderman.class );
 
         assertEquals( spiderman.spideySense, jsonSpiderman.spideySense );
         assertEquals( spiderman.superpower, jsonSpiderman.superpower );
@@ -569,7 +574,7 @@ public class JSONDeserializerTest {
     @Test
     public void testPoint() {
         String json = new JSONSerializer().serialize( new Point2D.Float(1.0f, 2.0f) );
-        Point2D.Float point = new JSONDeserializer<Point2D.Float>().deserialize( json );
+        Point2D.Float point = new JSONDeserializer<Point2D.Float>().deserialize( json, Point2D.Float.class );
         assertEquals( 1.0f, point.x, DELTA );
         assertEquals( 2.0f, point.y, DELTA );
     }

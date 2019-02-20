@@ -17,8 +17,8 @@ public class JSONDeserializerObjectFactoryTest {
         assertEquals( AccountType.Savings, account.getAccountType() );
     }
 
-    public class OrdinalObjectFactory implements ObjectFactory {
-        public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+    public class OrdinalObjectFactory implements ObjectFactory<Enum> {
+        public Enum instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
             try {
                 if( value instanceof Number ) {
                     Enum[] values = (Enum[])((Class) targetType).getDeclaredMethod("values").invoke(targetType);

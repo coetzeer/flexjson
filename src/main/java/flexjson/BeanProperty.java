@@ -1,7 +1,11 @@
 package flexjson;
 
+import flexjson.factories.ClassLocatorObjectFactory;
+import flexjson.factories.DefinedMappingObjectFactory;
+import flexjson.locators.TypeLocator;
 import flexjson.transformer.Transformer;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,7 +30,7 @@ public class BeanProperty {
         this.bean = bean;
         this.property = bean.getDeclaredField(name);
 
-        if (property != null && property.isAnnotationPresent(JSON.class)) {
+        if (property != null && property.isAnnotationPresent(JSON.class) ) {
             processAnnotation(property.getAnnotation(JSON.class));
         }
     }
@@ -42,11 +46,40 @@ public class BeanProperty {
         }
     }
 
-    private void processAnnotation(JSON annotation) {
-        jsonName = annotation.name().length() > 0 ? annotation.name() : name;
-        transformer = annotation.transformer() == Transformer.class ? null : new DeferredInstantiation<Transformer>( annotation.transformer() );
-        objectFactory = annotation.objectFactory() == ObjectFactory.class ? null : new DeferredInstantiation<ObjectFactory>( annotation.objectFactory() );
-        included = annotation.include();
+    private void processAnnotation(final JSON annotation) {
+        if( annotation != null ) {
+            jsonName = annotation.name().length() > 0 ? annotation.name() : name;
+            transformer = annotation.transformer() == Transformer.class ? null : new DeferredInstantiation<Transformer>( annotation.transformer() );
+            included = annotation.include();
+        }
+    }
+
+    public ObjectFactory getValueType() {
+        final JSONTypeHierarchy mappingAnnotation = findAnnotation( JSONTypeHierarchy.class );
+        if( mappingAnnotation != null ) {
+            TypeLocator<String> locator = new TypeLocator<String>(mappingAnnotation.typeFieldName());
+            for (TypeMapping mapping : mappingAnnotation.typeMappings()) {
+                locator.add(mapping.value(), mapping.type());
+            }
+            return new ClassLocatorObjectFactory(locator);
+        }
+
+        final JSONType typeAnnotation = findAnnotation(JSONType.class);
+        if( typeAnnotation != null ) {
+            return new DefinedMappingObjectFactory(typeAnnotation.definedClass());
+        }
+
+        return null;
+    }
+
+    private <T extends Annotation> T findAnnotation(Class<T> annotation) {
+        if( property != null && property.isAnnotationPresent(annotation) ) {
+            return property.getAnnotation(annotation);
+        }
+        if( readMethod != null && readMethod.isAnnotationPresent(annotation)) {
+            return readMethod.getAnnotation( annotation );
+        }
+        return null;
     }
 
     public String getName() {
@@ -106,7 +139,7 @@ public class BeanProperty {
             readMethod.setAccessible(true);
         }
 
-        if (readMethod != null && readMethod.isAnnotationPresent(JSON.class)) {
+        if (readMethod != null && readMethod.isAnnotationPresent(JSON.class) ) {
             processAnnotation(readMethod.getAnnotation(JSON.class));
         }
     }
@@ -159,7 +192,13 @@ public class BeanProperty {
         return transformer != null ? transformer.get() : null;
     }
 
-    public ObjectFactory getObjectFactory() throws InstantiationException, IllegalAccessException {
-        return objectFactory != null ? objectFactory.get() : null;
+    public ObjectFactory getObjectFactory() {
+        try {
+            return objectFactory != null ? objectFactory.get() : null;
+        } catch( InstantiationException ex ) {
+            throw new JSONException( "Could not create the object " + propertyType.getName() + " for field " + name, ex );
+        } catch( IllegalAccessException ex ) {
+            throw new JSONException( "Could not create the object " + propertyType.getName() + " for field " + name, ex );
+        }
     }
 }

@@ -13,4 +13,8 @@ public class HeatVision implements SuperPower {
     public float getPower() {
         return power;
     }
+
+    public String getType() {
+        return "heat";
+    }
 }
