@@ -77,9 +77,9 @@ public class ObjectBinder {
 
     public Object bind( Object source, Object target ) {
         if( target instanceof Map ) {
-            bindIntoMap( (Map)source, (Map<Object,Object>)target, null, null, null );
+            bindIntoMap( (Map)source, (Map<Object,Object>)target, null, null );
         } else if( target instanceof Collection ) {
-            bindIntoCollection( (Collection)source, (Collection<Object>)target, null, null );
+            bindIntoCollection( (Collection)source, (Collection<Object>)target, null );
         } else {
             bindIntoObject( (Map)source, target, target.getClass() );
         }
@@ -103,6 +103,10 @@ public class ObjectBinder {
         return bind( input, targetType, null );
     }
 
+    public <T extends Collection<Object>> T bindIntoCollection(Collection value, T target, Type targetType) {
+        return bindIntoCollection( value, target, targetType, null );
+    }
+
     public <T extends Collection<Object>> T bindIntoCollection(Collection value, T target, Type targetType, ObjectFactory valueFactory) {
         Type valueType = null;
         if( targetType instanceof ParameterizedType) {
@@ -112,12 +116,16 @@ public class ObjectBinder {
         objectStack.add( target );
         getCurrentPath().enqueue("values");
         for( Object obj : value ) {
-            target.add( bind( obj, valueType, findFactoryFor(getTargetClass(valueType), valueFactory ) ) );
+            target.add( bind( obj, valueType, findFactoryFor(getTargetClass(valueType), valueFactory != null ? valueFactory : getValueObjectFactory() ) ) );
         }
         getCurrentPath().pop();
         objectStack.removeLast();
         jsonStack.removeLast();
         return target;
+    }
+
+    public Map bindIntoMap(Map input, Map<Object,Object> result, Type keyType, Type valueType ) {
+        return bindIntoMap( input, result, keyType, valueType, null );
     }
 
     public Map bindIntoMap(Map input, Map<Object, Object> result, Type keyType, Type valueType, ObjectFactory valueFactory) {
@@ -130,7 +138,7 @@ public class ObjectBinder {
             currentPath.enqueue("values");
             Object jsonValue = input.get(inputKey);
             Class targetClass = findClassName( jsonValue, getTargetClass( valueType ) );
-            Object value = bind( jsonValue, valueType, findFactoryFor( targetClass, valueFactory ) );
+            Object value = bind( jsonValue, valueType, findFactoryFor( targetClass, valueFactory != null ? valueFactory : getValueObjectFactory() ) );
             currentPath.pop();
             result.put( key, value );
         }
@@ -154,7 +162,7 @@ public class ObjectBinder {
                             Type[] types = setMethod.getGenericParameterTypes();
                             if( types.length == 1 ) {
                                 Type paramType = types[0];
-                                setMethod.invoke( objectStack.getLast(), bind( value, resolveParameterizedTypes( paramType, targetType ), descriptor.getObjectFactory() ) );
+                                setMethod.invoke( objectStack.getLast(), bind( value, resolveParameterizedTypes( paramType, targetType ), getPropertyObjectFactory() ) );
                             } else {
                                 throw new JSONException(currentPath + ":  Expected a single parameter for method " + target.getClass().getName() + "." + setMethod.getName() + " but got " + types.length );
                             }
@@ -162,7 +170,7 @@ public class ObjectBinder {
                             Field field = descriptor.getProperty();
                             if( field != null ) {
                                 field.setAccessible( true );
-                                field.set( target, bind( value, field.getGenericType(), descriptor.getObjectFactory() ) );
+                                field.set( target, bind( value, field.getGenericType(), getPropertyObjectFactory() ) );
                             }
                         }
                         currentPath.pop();
@@ -350,8 +358,10 @@ public class ObjectBinder {
     }
 
     public ObjectFactory getValueObjectFactory() {
-        if( beanStack.isEmpty() ) return null;
+        ObjectFactory factory = pathFactories.get( getCurrentPath() );
+        if( factory != null ) return factory;
 
+        if( beanStack.isEmpty() ) return null;
         BeanProperty descriptor = beanStack.getFirst();
         if( descriptor != null ) {
             return descriptor.getValueType();
@@ -361,6 +371,9 @@ public class ObjectBinder {
     }
 
     public ObjectFactory getPropertyObjectFactory() {
+        ObjectFactory factory = pathFactories.get( getCurrentPath() );
+        if( factory != null ) return factory;
+
         if( beanStack.isEmpty() ) return null;
         BeanProperty descriptor = beanStack.getFirst();
         if( descriptor != null ) {

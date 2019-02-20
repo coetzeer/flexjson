@@ -26,13 +26,13 @@ public class ClassLocatorObjectFactory implements ObjectFactory {
             clazz = locator.locate( context, context.getCurrentPath() );
             if( clazz != null ) {
                 if( Collection.class.isAssignableFrom(clazz) ) {
-                    return context.bindIntoCollection( (Collection)value, (Collection<Object>)createTargetObject(clazz), targetType, context.getPropertyObjectFactory() );
+                    return context.bindIntoCollection( (Collection)value, (Collection<Object>)createTargetObject(clazz), targetType );
                 } else if( Map.class.isAssignableFrom(clazz) ) {
                     if( targetType instanceof ParameterizedType ) {
                         ParameterizedType ptype = (ParameterizedType) targetType;
-                        return context.bindIntoMap( (Map)value, (Map<Object,Object>)createTargetObject(clazz), ptype.getActualTypeArguments()[0], ptype.getActualTypeArguments()[1], context.getPropertyObjectFactory() );
+                        return context.bindIntoMap( (Map)value, (Map<Object,Object>)createTargetObject(clazz), ptype.getActualTypeArguments()[0], ptype.getActualTypeArguments()[1] );
                     } else {
-                        return context.bindIntoMap(  (Map)value, (Map<Object,Object>)createTargetObject(clazz), null, null, context.getPropertyObjectFactory() );
+                        return context.bindIntoMap(  (Map)value, (Map<Object,Object>)createTargetObject(clazz), null, null );
                     }
                 } else if( value instanceof Map ) {
                     return context.bindIntoObject( (Map)value,  createTargetObject(clazz), clazz );

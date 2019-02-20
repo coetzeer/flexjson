@@ -17,9 +17,9 @@ public class ExistingObjectFactory implements ObjectFactory {
 
     public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
         if( source instanceof Map ) {
-            return context.bindIntoMap( (Map)value, (Map<Object,Object>)source, null, null, context.getPropertyObjectFactory() );
+            return context.bindIntoMap( (Map)value, (Map<Object,Object>)source, null, null );
         } else if( source instanceof Collection) {
-            return context.bindIntoCollection( (Collection)value, (Collection)source, targetType, context.getPropertyObjectFactory() );
+            return context.bindIntoCollection( (Collection)value, (Collection)source, targetType );
         } else {
             return context.bindIntoObject( (Map)value, source, targetType );
         }
