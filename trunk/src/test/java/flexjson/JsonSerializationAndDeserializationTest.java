@@ -1,6 +1,7 @@
 package flexjson;
 
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import flexjson.factories.BooleanAsStringObjectFactory;
 import flexjson.mock.*;
 import flexjson.transformer.BooleanAsStringTransformer;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -129,11 +131,18 @@ public class JsonSerializationAndDeserializationTest {
         String json = jsonSerializer.deepSerialize( demo );
         JSONDeserializer<MapNoTyping> jsonDeserializer = new JSONDeserializer<MapNoTyping>();
         MapNoTyping result = jsonDeserializer
-//                .use("data.values", new ObjectFactory() {
-//                    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
-//
-//                    }
-//                })
+                .use("data.values", new ObjectFactory() {
+                    public Object instantiate(ObjectBinder context, Object value, Type targetType, Class targetClass) {
+                        // todo this isn't a great solution because it relies on specifics of this situation and isn't a general solution.
+                        // todo But we have to change the graph grammar to attach things to specific keys which isn't supported now
+                        // todo and requires more incompatible changes.
+                        if( value instanceof Map ) {
+                            return context.bindIntoObject( (Map)value, new TestClass3(), TestClass3.class );
+                        } else {
+                            return value;
+                        }
+                    }
+                })
                 .deserialize( json, MapNoTyping.class );
 
         assertTrue( result.getData().containsKey("key1") );
