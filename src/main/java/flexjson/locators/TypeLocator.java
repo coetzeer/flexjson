@@ -22,7 +22,7 @@ public class TypeLocator<T> implements ClassLocator {
         this.fieldname = fieldname;
     }
 
-    public TypeLocator add( T value, Class type ) {
+    public TypeLocator<T> add( T value, Class type ) {
         types.put( value, type );
         return this;
     }
