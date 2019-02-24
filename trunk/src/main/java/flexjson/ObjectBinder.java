@@ -1,6 +1,7 @@
 package flexjson;
 
 import flexjson.factories.*;
+import sun.reflect.generics.tree.Wildcard;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -214,14 +215,29 @@ public class ObjectBinder {
         } else if( genericType instanceof ParameterizedType ) {
             return genericType;
         } else if( genericType instanceof TypeVariable ) {
-            return targetType;
+            if( targetType instanceof  ParameterizedType ) {
+                return findActualTypeFor((TypeVariable) genericType, (ParameterizedType) targetType);
+            } else {
+                return targetType;
+            }
         } else if( genericType instanceof WildcardType ) {
+            // todo how to handle wildcards?  This may have to be handled by the user
             return targetType;
         } else if( genericType instanceof GenericArrayType ) {
             return ((GenericArrayType)genericType).getGenericComponentType();
         } else {
             throw new JSONException( currentPath + ":  Unknown generic type " + genericType + ".");
         }
+    }
+
+    private Type findActualTypeFor(TypeVariable genericType, ParameterizedType parameterizedType) {
+        Type[] genericTypeDefinitions = genericType.getGenericDeclaration().getTypeParameters();
+        for( int i = 0; i < genericTypeDefinitions.length; i++ ) {
+            if( genericTypeDefinitions[i].equals(genericType) ) {
+                return parameterizedType.getActualTypeArguments()[ i ];
+            }
+        }
+        throw new JSONException( getCurrentPath() + ": Cannot find index for " + genericType.getName() + " in " + parameterizedType );
     }
 
 
