@@ -4,6 +4,10 @@ public class Book extends Periodical {
 
     private String isbn;
 
+    protected Book() {
+        super();
+    }
+
     public Book(String isbn, String name) {
         super(name);
         this.isbn = isbn;
@@ -19,14 +23,15 @@ public class Book extends Periodical {
         isbn = id;
     }
 
+    public String getType() {
+        return "book";
+    }
+
     public void setID(Integer id) {
         isbn = Integer.toString( id );
     }
 
     public boolean isA() {
         return false;
-    }
-
-    public void setName(String name) {
     }
 }

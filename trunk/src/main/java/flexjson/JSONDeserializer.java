@@ -3,6 +3,7 @@ package flexjson;
 import flexjson.factories.ClassLocatorObjectFactory;
 import flexjson.factories.ExistingObjectFactory;
 import flexjson.locators.StaticClassLocator;
+import flexjson.locators.TypeLocator;
 
 import java.io.Reader;
 import java.util.Map;
@@ -358,7 +359,11 @@ public class JSONDeserializer<T> {
     }
 
     public JSONDeserializer<T> use( String path, Class clazz ) {
-        return use( path, new StaticClassLocator(clazz) );
+        if( clazz.getAnnotation(JSONTypeHierarchy.class) != null ) {
+            return use( path, TypeLocator.from( (JSONTypeHierarchy)clazz.getAnnotation(JSONTypeHierarchy.class) ));
+        } else {
+            return use( path, new StaticClassLocator(clazz) );
+        }
     }
 
     public JSONDeserializer<T> use( Class clazz, ObjectFactory factory ) {
