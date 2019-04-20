@@ -88,22 +88,6 @@ public class JSONDeserializerTest {
     }
 
     @Test
-    public void testDeserializeInterfacesUsingAnnotations() {
-        Hero superman = creator.createSuperman();
-        String json = new JSONSerializer()
-                .include("powers")
-                .transform(new SimpleClassnameTransformer(), "powers.class")
-                .serialize(superman);
-
-        Hero jsonSuperMan = new JSONDeserializer<Hero>()
-                .deserialize(json, Hero.class);
-        assertNotNull("Make sure we got back a superman", jsonSuperMan);
-
-        assertEquals("Make sure the super powers were created properly.", 4, jsonSuperMan.getPowers().size());
-        assertHeroHasPowers(jsonSuperMan);
-    }
-
-    @Test
     public void testNoClassHints() {
         Hero superman = creator.createSuperman();
         String json = new JSONSerializer().exclude("*.class").serialize(superman);
@@ -613,6 +597,73 @@ public class JSONDeserializerTest {
         assertEquals(4.5d, obj.get("decimal") );
         assertEquals(-45l, obj.get("negativeLong") );
         assertEquals(34l, obj.get("positiveLong") );
+    }
+
+    @Test
+    public void testParamterizedContainers() {
+        TimeFilter src = new TimeFilter("Date", "[Date].[yearMonth]")
+                .include("[Date].[yearMonth].[2014].[1]", "[Date].[yearMonth].[2015].[12]")
+                .include("[Date].[yearMonth].[2016].[1]", "[Date].[yearMonth].[2017].[12]");
+
+        String json = new JSONSerializer().deepSerialize( src );
+
+        TimeFilter dest = new JSONDeserializer<TimeFilter>().deserialize( json, TimeFilter.class );
+
+        assertEquals("Date", dest.getName());
+        assertEquals( 2, dest.getIncludes().size() );
+        assertEquals( "[Date].[yearMonth].[2014].[1]",  dest.getIncludes().get(0).getFirst() );
+        assertEquals( "[Date].[yearMonth].[2015].[12]",  dest.getIncludes().get(0).getSecond() );
+
+        assertEquals( "[Date].[yearMonth].[2016].[1]",  dest.getIncludes().get(1).getFirst() );
+        assertEquals( "[Date].[yearMonth].[2017].[12]",  dest.getIncludes().get(1).getSecond() );
+    }
+
+    @Test
+    public void testDeserializeInterfacesUsingTypeHierarchy() {
+        Hero superman = creator.createSuperman();
+        String json = new JSONSerializer()
+                .include("powers")
+                .transform(new SimpleClassnameTransformer(), "powers.class")
+                .serialize(superman);
+
+        Hero jsonSuperMan = new JSONDeserializer<Hero>()
+                .deserialize(json, Hero.class);
+        assertNotNull("Make sure we got back a superman", jsonSuperMan);
+
+        assertEquals("Make sure the super powers were created properly.", 4, jsonSuperMan.getPowers().size());
+        assertHeroHasPowers(jsonSuperMan);
+    }
+
+    @Test
+    public void testDeserialzeTypeHierarchy() {
+        Book book = new Book("123456789", "Das Kapital");
+        Magazine magazine = new Magazine("75843975", "Time");
+
+        List<Periodical> periodicals = new ArrayList<Periodical>();
+        periodicals.add( book );
+        periodicals.add(magazine);
+
+        String json = new JSONSerializer().deepSerialize( periodicals );
+
+        List<Periodical> target = new  JSONDeserializer<List<Periodical>>().use("values", Periodical.class).deserialize( json );
+
+        assertEquals(2, target.size() );
+        assertEquals( Book.class, target.get(0).getClass() );
+        assertEquals( Magazine.class, target.get(1).getClass() );
+    }
+
+    @Test
+    public void testDeserializeTypeHierarchyRoot() {
+        Book book = new Book("8978675645", "Wealth of Nations");
+
+        String json = new JSONSerializer().deepSerialize( book );
+
+        Periodical p = new JSONDeserializer<Periodical>().deserialize(json, Periodical.class);
+
+        assertNotNull( p );
+        assertEquals( "book", p.getType() );
+        assertEquals( "Wealth of Nations", p.getName() );
+        assertTrue( p instanceof Book );
     }
 
     public static class SimpleClassnameTransformer implements Transformer {

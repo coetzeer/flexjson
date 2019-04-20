@@ -4,6 +4,7 @@ import flexjson.ClassLocator;
 import flexjson.Path;
 import flexjson.ObjectBinder;
 
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 /**
@@ -17,6 +18,7 @@ public class StaticClassLocator implements ClassLocator {
 
     public StaticClassLocator(Class clazz) {
         target = clazz;
+        if( target.isInterface() || Modifier.isAbstract(target.getModifiers()) ) throw new IllegalArgumentException("Either use @JSONTypeHierarchy annotation or use a TypeLocator to specify the concrete class to use.");
     }
 
     public Class locate(ObjectBinder context, Path currentPath) {

@@ -1,9 +1,6 @@
 package flexjson.locators;
 
-import flexjson.ClassLocator;
-import flexjson.Path;
-import flexjson.ObjectBinder;
-import flexjson.JSONException;
+import flexjson.*;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -17,6 +14,14 @@ public class TypeLocator<T> implements ClassLocator {
 
     private String fieldname;
     private Map<T,Class> types = new HashMap<T,Class>();
+
+    public static TypeLocator<String> from(JSONTypeHierarchy typeHierarchy) {
+        TypeLocator<String> locator = new TypeLocator<String>(typeHierarchy.typeFieldName());
+        for (TypeMapping mapping : typeHierarchy.typeMappings()) {
+            locator.add(mapping.value(), mapping.type());
+        }
+        return locator;
+    }
 
     public TypeLocator( String fieldname ) {
         this.fieldname = fieldname;

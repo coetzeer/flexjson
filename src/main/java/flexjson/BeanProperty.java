@@ -55,18 +55,20 @@ public class BeanProperty {
     }
 
     public ObjectFactory getValueType() {
+        // todo this probably could be removed
         final JSONTypeHierarchy mappingAnnotation = findAnnotation( JSONTypeHierarchy.class );
         if( mappingAnnotation != null ) {
-            TypeLocator<String> locator = new TypeLocator<String>(mappingAnnotation.typeFieldName());
-            for (TypeMapping mapping : mappingAnnotation.typeMappings()) {
-                locator.add(mapping.value(), mapping.type());
-            }
-            return new ClassLocatorObjectFactory(locator);
+            return new ClassLocatorObjectFactory( TypeLocator.from( mappingAnnotation ) );
         }
 
         final JSONType typeAnnotation = findAnnotation(JSONType.class);
         if( typeAnnotation != null ) {
-            return new DefinedMappingObjectFactory(typeAnnotation.definedClass());
+            final JSONTypeHierarchy typeHierarchy = (JSONTypeHierarchy)typeAnnotation.definedClass().getAnnotation( JSONTypeHierarchy.class );
+            if( typeHierarchy != null ) {
+                return new ClassLocatorObjectFactory( TypeLocator.from(typeHierarchy) );
+            } else {
+                return new DefinedMappingObjectFactory(typeAnnotation.definedClass());
+            }
         }
 
         return null;
