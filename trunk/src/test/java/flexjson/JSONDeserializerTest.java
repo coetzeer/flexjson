@@ -636,8 +636,8 @@ public class JSONDeserializerTest {
 
     @Test
     public void testDeserialzeTypeHierarchy() {
-        Book book = new Book("123456789", "Das Kapital");
-        Magazine magazine = new Magazine("75843975", "Time");
+        Book book = new Book("123456789", "Das Kapital", 450);
+        Magazine magazine = new Magazine("75843975", "Time", 80);
 
         List<Periodical> periodicals = new ArrayList<Periodical>();
         periodicals.add( book );
@@ -654,7 +654,7 @@ public class JSONDeserializerTest {
 
     @Test
     public void testDeserializeTypeHierarchyRoot() {
-        Book book = new Book("8978675645", "Wealth of Nations");
+        Book book = new Book("8978675645", "Wealth of Nations", 800);
 
         String json = new JSONSerializer().deepSerialize( book );
 
@@ -663,6 +663,7 @@ public class JSONDeserializerTest {
         assertNotNull( p );
         assertEquals( "book", p.getType() );
         assertEquals( "Wealth of Nations", p.getName() );
+        assertEquals( 800L, p.getPages() );
         assertTrue( p instanceof Book );
     }
 
