@@ -47,6 +47,7 @@ public class ObjectBinder {
         factories.put( Array.class, new ArrayObjectFactory() );
         factories.put( BigDecimal.class, new BigDecimalFactory() );
         factories.put( BigInteger.class, new BigIntegerFactory() );
+        factories.put( Number.class, new NumberObjectFactory() );
         /* this is added because it possible that typing information
          * is lost when using un-typed collections.  This means a
          * JsonNumber could be the only hint we have for what type
@@ -243,11 +244,11 @@ public class ObjectBinder {
 
     private Class findClassName( Object map, Class targetType ) throws JSONException {
         if( !pathFactories.containsKey( currentPath ) ) {
-            Class mostSpecificType = useMostSpecific( null, targetType );
-            if( map != null && mostSpecificType == null ) {
-                return map.getClass();
-            } else {
+            if( map != null ) {
+                Class mostSpecificType = useMostSpecific(targetType, map.getClass());
                 return mostSpecificType;
+            } else {
+                return targetType;
             }
         } else {
             return null;
@@ -256,7 +257,7 @@ public class ObjectBinder {
 
     protected Class useMostSpecific(Class classFromTarget, Class typeFound) {
         if( classFromTarget != null && typeFound != null ) {
-            return typeFound.isAssignableFrom( classFromTarget ) ? classFromTarget : typeFound;
+            return classFromTarget.isAssignableFrom( typeFound ) ?  typeFound : classFromTarget;
         } else if( typeFound != null ) {
             return typeFound;
         } else if( classFromTarget != null ) {

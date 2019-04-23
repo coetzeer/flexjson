@@ -8,8 +8,8 @@ public class Book extends Periodical {
         super();
     }
 
-    public Book(String isbn, String name) {
-        super(name);
+    public Book(String isbn, String name, int pages) {
+        super(name, pages);
         this.isbn = isbn;
     }
 

@@ -11,10 +11,13 @@ public abstract class Periodical {
 
     private String name;
 
+    private Number pages;
+
     protected Periodical() {}
 
-    protected Periodical(String name) {
+    protected Periodical(String name, int pages) {
         this.name = name;
+        this.pages = pages;
     }
 
     public abstract String getID();
@@ -29,5 +32,13 @@ public abstract class Periodical {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Number getPages() {
+        return pages;
+    }
+
+    public void setPages(Number pages) {
+        this.pages = pages;
     }
 }

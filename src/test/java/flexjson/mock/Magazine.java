@@ -4,17 +4,13 @@ public class Magazine extends Periodical {
 
     private String issn;
 
-    public Magazine(String issn, String name) {
-        super(name);
+    public Magazine(String issn, String name, int pages) {
+        super(name, pages);
         this.issn = issn;
     }
 
     protected Magazine() {
         super();
-    }
-
-    public Magazine(String name) {
-        super(name);
     }
 
     public String getID() {
