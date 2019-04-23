@@ -1,7 +1,6 @@
 package flexjson;
 
 import flexjson.factories.*;
-import sun.reflect.generics.tree.Wildcard;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
