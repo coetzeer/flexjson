@@ -1,6 +1,9 @@
 package flexjson;
 
 import flexjson.factories.DateObjectFactory;
+import flexjson.mock.wizards.Fireball;
+import flexjson.mock.wizards.Heal;
+import flexjson.mock.wizards.Player;
 import flexjson.model.Account;
 import flexjson.transformer.DateTransformer;
 import flexjson.transformer.Transformer;
@@ -665,6 +668,20 @@ public class JSONDeserializerTest {
         assertEquals( "Wealth of Nations", p.getName() );
         assertEquals( 800L, p.getPages() );
         assertTrue( p instanceof Book );
+    }
+
+    @Test
+    public void testDeserializeWhereJSONTypeHierarchyIsOnValueClass() {
+        Player mage = new Player("Merlin").stats( 100, 20, 30 ).add( new Fireball(25), new Heal( 25 ) );
+
+        String json = new JSONSerializer().deepSerialize( mage );
+
+        Player player = new JSONDeserializer<Player>().deserialize(json, Player.class );
+
+        assertNotNull( player );
+        assertEquals( 2, player.getSpells().size() );
+        assertEquals( Fireball.class, player.getSpells().get(0).getClass() );
+        assertEquals( Heal.class, player.getSpells().get(1).getClass() );
     }
 
     public static class SimpleClassnameTransformer implements Transformer {

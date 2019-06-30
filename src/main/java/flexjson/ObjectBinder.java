@@ -1,6 +1,7 @@
 package flexjson;
 
 import flexjson.factories.*;
+import flexjson.locators.TypeLocator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -280,6 +281,9 @@ public class ObjectBinder {
         ObjectFactory factory;
         factory = factories.get(targetType);
         if (factory == null && targetType != null) {
+            factory = resolveTypeHierarchy( targetType );
+            if( factory != null ) return factory;
+
             for (Class intf : targetType.getInterfaces()) {
                 factory = findFactoryByTargetClass(intf);
                 if (factory != null) return factory;
@@ -291,6 +295,14 @@ public class ObjectBinder {
         } else {
             return factory;
         }
+    }
+
+    private ObjectFactory resolveTypeHierarchy(Class targetType) {
+        if( targetType.isAnnotationPresent(JSONTypeHierarchy.class) ) {
+            JSONTypeHierarchy typeHierarchy = (JSONTypeHierarchy) targetType.getAnnotation( JSONTypeHierarchy.class);
+            return new ClassLocatorObjectFactory( TypeLocator.from(typeHierarchy) );
+        }
+        return null;
     }
 
     protected Object instantiate( Class clazz ) {
