@@ -216,11 +216,9 @@ public class ObjectBinder {
         } else if( genericType instanceof ParameterizedType ) {
             return genericType;
         } else if( genericType instanceof TypeVariable ) {
-            if( targetType instanceof  ParameterizedType ) {
-                return findActualTypeFor((TypeVariable) genericType, (ParameterizedType) targetType);
-            } else {
-                return targetType;
-            }
+            TypeVariable typeVariable = (TypeVariable) genericType;
+            Type t = findActualTypeForTypeVariable( typeVariable, targetType );
+            return t != null ? t : targetType;
         } else if( genericType instanceof WildcardType ) {
             // todo how to handle wildcards?  This may have to be handled by the user
             return targetType;
@@ -231,6 +229,28 @@ public class ObjectBinder {
         }
     }
 
+    private Type findActualTypeForTypeVariable(TypeVariable typeVariable, Type targetType) {
+        if( targetType instanceof ParameterizedType ) {
+            Type t = findActualTypeFor(typeVariable, (ParameterizedType)targetType );
+            if( t != null ) return t;
+        }
+
+        if( targetType instanceof Class ) {
+            Class targetClass = ((Class)targetType);
+            Type superClass = findActualTypeForTypeVariable( typeVariable, targetClass.getGenericSuperclass() );
+            if( superClass != null ) {
+                return superClass;
+            } else {
+                for( Type interfaceType : targetClass.getGenericInterfaces() ) {
+                    Type t = findActualTypeForTypeVariable( typeVariable, interfaceType );
+                    if( t != null ) return t;
+                }
+            }
+        }
+
+        return null;
+    }
+
     private Type findActualTypeFor(TypeVariable genericType, ParameterizedType parameterizedType) {
         Type[] genericTypeDefinitions = genericType.getGenericDeclaration().getTypeParameters();
         for( int i = 0; i < genericTypeDefinitions.length; i++ ) {
@@ -238,7 +258,8 @@ public class ObjectBinder {
                 return parameterizedType.getActualTypeArguments()[ i ];
             }
         }
-        throw new JSONException( getCurrentPath() + ": Cannot find index for " + genericType.getName() + " in " + parameterizedType );
+        //throw new JSONException( getCurrentPath() + ": Cannot find index for " + genericType.getName() + " in " + parameterizedType );
+        return null;
     }
 
 
