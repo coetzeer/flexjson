@@ -1,6 +1,7 @@
 package flexjson;
 
 import flexjson.factories.DateObjectFactory;
+import flexjson.mock.modifiers.IntegerModifier;
 import flexjson.mock.wizards.Fireball;
 import flexjson.mock.wizards.Heal;
 import flexjson.mock.wizards.Player;
@@ -682,6 +683,18 @@ public class JSONDeserializerTest {
         assertEquals( 2, player.getSpells().size() );
         assertEquals( Fireball.class, player.getSpells().get(0).getClass() );
         assertEquals( Heal.class, player.getSpells().get(1).getClass() );
+    }
+
+    @Test
+    public void testTypeVariableBaseClass() {
+        IntegerModifier mod = new IntegerModifier(150);
+
+        String json = new JSONSerializer().deepSerialize( mod );
+
+        IntegerModifier modifier = new JSONDeserializer<IntegerModifier>().deserialize( json, IntegerModifier.class );
+
+        assertNotNull( modifier.getLimit() );
+        assertEquals( 150, modifier.getLimit().intValue() );
     }
 
     public static class SimpleClassnameTransformer implements Transformer {
